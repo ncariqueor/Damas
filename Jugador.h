@@ -2,7 +2,7 @@
  * File:   Jugador.h
  * Author: nelson
  *
- * Created on 27 de mayo de 2015, 20:27
+ * Created on 3 de junio de 2015, 21:54
  */
 
 #ifndef JUGADOR_H
@@ -10,18 +10,19 @@
 #include "Arbol.h"
 #include "Tablero.h"
 
+using namespace std;
+
 class Jugador {
 public:
-    Arbol *miArbol;
+    Arbol miArbol;
     bool jugador;
     int profundidad;
     
-    Jugador(const Tablero& t, int, bool);
+    Jugador(const Tablero& t, int prof, bool player);
     Tablero& movimiento();
-    void actualizar(Tablero, bool);
-    Arbol& get(int);
-private:
-
+    void actualizar(const Tablero& t, bool jugador);
+    Arbol& get(int i);
+    void mostrarHijos();
 };
 
 #endif	/* JUGADOR_H */

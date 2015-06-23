@@ -1,89 +1,135 @@
+/* 
+ * File:   Arbol.cpp
+ * Author: nelson
+ * 
+ * Created on 3 de junio de 2015, 21:12
+ */
 
 #include "Arbol.h"
-
 Arbol::Arbol(){
-
+    hijos;
+    player;
+    tab;
 }
 
-Arbol::Arbol(const Tablero& t, bool jugador){
-    hijos = new list<Arbol>();
-    tablero = t;
-    player = jugador;
+Arbol::Arbol(const Tablero& t, bool player) {
+    hijos = list<Arbol>();
+    this->player = player;
+    tab.operator =(t);
 }
 
-void Arbol::brote(bool jugador){
-    list<Arbol>::iterator pos = hijos->begin();
+void Arbol::Brote(bool jugador){
     
-    while(pos != hijos->end()){
-        pos->brote(!jugador);
-        pos++;
+    list<Arbol>::iterator ini = hijos.begin();
+    list<Arbol>::iterator fin = hijos.end();
+    while(ini != fin){
+        ini->Brote(!jugador);
+        ini++;
     }
     
-    if(hijos->empty()){
-        list<Tablero> *moves = &tablero.movimientos(jugador);
-        list<Tablero>::iterator pos2 = moves->begin();
-        while(pos2 != moves->end()){
-            Arbol *aux = new Arbol(*pos2, jugador);
-            hijos->push_back(*aux);
-            pos2++;
+    if(hijos.empty()){
+        list<Tablero> moves;
+        moves.operator =(tab.getMovimiento(jugador));
+        
+        list<Tablero>::iterator ini = moves.begin();
+        list<Tablero>::iterator fin = moves.end();
+        
+        while(ini != fin){
+            hijos.push_back(Arbol(*ini, jugador));
+            ini++;
         }
     }
 }
 
 double Arbol::minimax(bool jugador){
-    if(hijos->empty())
-        return tablero.valorTablero();
+    if(hijos.empty()){
+        double tmp = tab.valorTablero();
+        if(tab.comer > 0){
+            if(tmp>0)
+                return tmp *=2;
+            else
+                return tmp *=-2;
+        }
+        if(tab.comer < 0){
+            if(tmp>0)
+                return tmp *=-2;
+            else
+                return tmp *=2;
+        }
+        
+        return tmp;
+    }
     
     if(jugador){
-        double a = 0;
-        list<Arbol>::iterator pos = hijos->begin();
-        while(pos != hijos->end()){
-            a = (a > pos->minimax(!jugador)? a : pos->minimax(!jugador));
-            pos++;
+        double max = 0;
+        list<Arbol>::iterator ini = hijos.begin();
+        list<Arbol>::iterator fin = hijos.end();
+        
+        while(ini != fin){
+            max = (max < ini->minimax(!jugador)? ini->minimax(!jugador) : max);
+            ini++;
         }
-        return a;
-    }
-    else{
-        double a = 999999;
-        list<Arbol>::iterator pos = hijos->begin();
-        while(pos != hijos->end()){
-            a = (a < pos->minimax(!jugador)? a : pos->minimax(!jugador));
-            pos++;
+        return max;
+    }else{
+        double min = 999;
+        list<Arbol>::iterator ini = hijos.begin();
+        list<Arbol>::iterator fin = hijos.end();
+        
+        while(ini != fin){
+            min = (min > ini->minimax(!jugador)? ini->minimax(!jugador) : min);
+            ini++;
         }
-        return a;
+        return min;
     }
 }
 
 Arbol& Arbol::movimiento(bool jugador){
     
-    Arbol *arbol = new Arbol();
-    if(hijos->empty()){
-        return *arbol;
+    if(hijos.empty()){
+        return *this;
     }
     
-    Arbol *mejor;
+    Arbol *tmp;
+    tmp = this;
     if(jugador){
-        double a = 0;
-        list<Arbol>::iterator pos = hijos->begin();
-        while(pos != hijos->end()){
-            double valor = pos->minimax(!jugador);
-            if(mejor == NULL || valor > a){
-                a = valor;
-                mejor = &*pos;
+        double max = 0;
+        list<Arbol>::iterator ini = hijos.begin();
+        list<Arbol>::iterator fin = hijos.end();
+        
+        while(ini != fin){
+            double valor = ini->minimax(!jugador);
+            if(tmp == this || valor >= max){
+                max = valor;
+                tmp = &*ini;
             }
-            pos++;
+            ini++;
         }
     }else{
-        double a = 9999;
-        list<Arbol>::iterator pos = hijos->begin();
-        while(pos != hijos->end()){
-            double valor = pos->minimax(!jugador);
-            if(mejor == NULL || valor < a){
-                a = valor;
-                mejor = &*pos;
+        double min = 999;
+        list<Arbol>::iterator ini = hijos.begin();
+        list<Arbol>::iterator fin = hijos.end();
+        
+        while(ini != fin){
+            double valor = ini->minimax(!jugador);
+            if(tmp == this || valor <= min){
+                min = valor;
+                tmp = &*ini;
             }
-            pos++;
+            ini++;
         }
     }
-    return *mejor;
+    return *tmp;
+    
 }
+
+Arbol& Arbol::operator =(const Arbol& ab){
+    if(this != &ab){
+        this->hijos.operator =(ab.hijos);
+        this->tab.operator =(ab.tab);
+        this->player = ab.player;
+    }
+    return *this;
+}
+
+
+

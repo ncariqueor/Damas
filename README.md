@@ -1,5 +1,4 @@
 Juego de las damas
 
-Aún no está apto para jugar.
-
+Versión beta, falta resolver algunos bugs.
 
